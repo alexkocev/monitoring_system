@@ -1,0 +1,11 @@
+# Ignore environment files
+.env
+
+# Ignore service account keys and JSON files
+*.json
+
+# Ignore Python virtual environments
+venv/
+
+# Ignore cache and temporary files
+__pycache__/

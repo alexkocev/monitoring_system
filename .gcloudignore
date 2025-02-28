@@ -1,0 +1,16 @@
+# This file specifies which files should be ignored by Google Cloud Build when
+# uploading project files for building the Docker image.
+
+# By default, we exclude everything, 
+*
+
+# and then specifically include only the required files for our project build. This ensures that:
+# 1. Large or unnecessary files aren't uploaded to Cloud Build
+# 2. Sensitive credentials like .env and JSON keys are explicitly included
+# 3. Only essential application files are part of the Docker build context
+!main.py
+!requirements.txt
+!Dockerfile
+
+!sandbox-a-451617-e3eaf9bc7d8b.json
+!steadfast-bebop-389314-c6da75a035db.json
