@@ -1,20 +1,26 @@
 # GA4-Magento Monitoring System
 
-A monitoring system that compares Magento transaction data (source of truth) with GA4 tracking data, providing daily coverage analysis via Slack notifications.
+A monitoring system that compares Magento transaction data (source of truth) with GA4 tracking data, providing weekly coverage analysis via Slack notifications.
 
 ## Overview
 
 This system:
-- Fetches transaction and revenue data from BigQuery
+- Fetches transaction, revenue, and other key performance indicators from BigQuery
 - Compares Magento and GA4 data to calculate coverage rates
 - Uses Claude AI to analyze trends and generate insights
-- Delivers concise, formatted daily reports to Slack
+- Delivers concise, formatted weekly reports to Slack
 
 ## Features
 
-- Automated daily coverage analysis at 8:00 UTC
+- Automated weekly coverage analysis at 8:00 UTC
 - Smart status indicators for critical, warning, and good states
-- Transaction and revenue coverage metrics
+- Comprehensive KPI monitoring including:
+  - Transaction coverage
+  - Revenue coverage
+  - Product view tracking
+  - Add-to-cart events
+  - Checkout initiations
+  - User engagement metrics
 - Trend analysis with historic context
 - Cloud-based serverless architecture on Google Cloud Platform
 
@@ -41,17 +47,28 @@ The system requires the following environment variables:
 
 ## Deployment
 
-The system is deployed as a Cloud Run job in Google Cloud Platform, triggered daily by Cloud Scheduler.
+The system is deployed as a Cloud Run job in Google Cloud Platform, triggered weekly by Cloud Scheduler.
 
 ## Sample Output
 
 ```
-✅ Coverage Above Threshold - Feb 28, 2025
-Transaction coverage has improved above 80% after a week of below-threshold performance. Revenue coverage remains stable.
-- *Transactions*: 716 (Magento) vs 589 (GA4)
+✅ Weekly KPI Coverage Report - Mar 3-9, 2025
+Overall data tracking coverage has improved across most metrics. Revenue tracking shows stability with slight improvement.
+
+Transaction Data:
+- *Transactions*: 5,328 (Magento) vs 4,383 (GA4)
 - *Transaction Coverage*: 82.3% (↑ 3.5%)
-- *Revenue*: $40.8K (Magento) vs $32.7K (GA4)
-- *Revenue Coverage*: 80.1% (↑ 1.8%)
+- *Revenue*: $298.2K (Magento) vs $242.5K (GA4)
+- *Revenue Coverage*: 81.3% (↑ 1.2%)
+
+User Journey Metrics:
+- *Product Views*: 95.2% coverage (↑ 2.1%)
+- *Add to Cart*: 87.4% coverage (↑ 4.3%)
+- *Checkout Initiations*: 84.9% coverage (↑ 3.7%)
+
+Top Undertracked Categories:
+- Accessories: 76.2% revenue coverage
+- Sale Items: 79.1% revenue coverage
 ```
 
 ## Maintenance
