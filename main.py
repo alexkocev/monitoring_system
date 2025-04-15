@@ -1,6 +1,4 @@
 #%%
-
-
 # -----------
 # - IMPORTS -
 # -----------
@@ -20,6 +18,7 @@ from scipy import interpolate
 # Google Cloud and API services
 from google.cloud import bigquery
 from google.oauth2.credentials import Credentials
+from google.oauth2 import service_account
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -60,6 +59,8 @@ GCP_SERVICE_ACCOUNT_OAUTH = os.getenv("GCP_SERVICE_ACCOUNT_OAUTH")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")   
 SLACK_TOKEN = os.getenv("SLACK_TOKEN")       
 SLACK_CHANNEL_ID = os.getenv("SLACK_CHANNEL_ID")      
+FOLDER_ID = os.getenv("FOLDER_ID")
+
 
 # Set the Google Cloud credentials environment variable
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = BQ_PATH_KEY
@@ -1784,7 +1785,7 @@ def analyze_top_products(df_product, run_date=None, top_n=5):
     
     # Add totals row
     formatted_results_text += f"{'-' * 87}\n"
-    formatted_results_text += f"{'TOTAL':<25} {f'€{result_dict['total_revenue']['previous_week']:,.1f}':<15} {'100.0%':<10} {f'€{result_dict['total_revenue']['earlier_week']:,.1f}':<15} {'100.0%':<10} "
+    formatted_results_text += f"{'TOTAL':<25} {'€{:,.1f}'.format(result_dict['total_revenue']['previous_week']):<15} {'100.0%':<10} {'€{:,.1f}'.format(result_dict['total_revenue']['earlier_week']):<15} {'100.0%':<10} "
     
     # Calculate total percent change as standard float with 1 decimal place
     if result_dict['total_revenue']['earlier_week'] > 0:
@@ -2840,11 +2841,25 @@ coverage_plot_path = create_coverage_visualization(df_coverage_clean, df_weekly)
 
 
 
+def get_credentials():
+    """Get service account credentials."""
+    creds = None
+
+    # If you have the service account credentials saved as a JSON file, use them
+    if os.path.exists(BQ_PATH_KEY):  # Path to your service account JSON key
+        creds = service_account.Credentials.from_service_account_file(
+            BQ_PATH_KEY,  # Replace with your actual file path
+            scopes=['https://www.googleapis.com/auth/documents', 'https://www.googleapis.com/auth/drive']
+        )
+
+    return creds
+
+"""
 # Define the scopes - need both docs and drive
 SCOPES = ['https://www.googleapis.com/auth/documents', 'https://www.googleapis.com/auth/drive']
 
 def get_credentials():
-    """Get and refresh OAuth 2.0 credentials."""
+    '''Get and refresh OAuth 2.0 credentials.'''
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_info(
@@ -2863,7 +2878,7 @@ def get_credentials():
             token.write(creds.to_json())
 
     return creds
-
+"""
 def execute_with_rate_limiting(request_fn, max_retries=5, initial_delay=1):
     """
     Execute a Google API request with rate limiting and retry logic.
@@ -3079,10 +3094,20 @@ def create_weekly_google_doc_report(
         
         # Step 1: Create a copy of the document
         print("Creating new document...")
+        '''
         copied_file = drive_service.files().copy(
             fileId=original_doc_id,
             body={'name': new_title}
         ).execute()
+        '''
+        copied_file = drive_service.files().copy(
+            fileId=original_doc_id,
+            body={
+                'name': new_title,  # Set the document's name
+                'parents': [FOLDER_ID]  # Specify the parent folder where the document will be stored
+            }
+        ).execute()
+                
         
         new_doc_id = copied_file['id']
         print(f"Created document with ID: {new_doc_id}")
@@ -3905,48 +3930,6 @@ send_slack_report_with_image("                             ")
 # Send GGdoc link
 send_slack_report_with_image(f"You want to save the report as PDF and send to the client? Check and upload as PDF here: https://docs.google.com/document/d/{doc_id}/ ")
 send_slack_report_with_image("                             ")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-msg = """
-Hello team! 👋
-
-I'm your Data Detective 🤖
-
-I analyze the Magento vs GA4 tracking coverage for qwertee.com and send you automated alerts every morning at 09:00 LTV time. Using AI, I scan and evaluate the past 90 days of data to identify trends and potential issues.
-
-Note that I exclude the most recent 24-48 hours from my analysis since GA4 data isn't real-time and needs time to fully process.
-
-For deeper insights and visualizations, check out our dashboard:
-https://lookerstudio.google.com/reporting/112b5f97-bb39-4f07-802f-6a5481dbc76e
-
-Looking forward to keeping you updated on our tracking health! If coverage drops below our thresholds, I'll let you know!
-"""
-# send_message_to_channel(msg)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
